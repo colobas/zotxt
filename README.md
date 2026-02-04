@@ -5,7 +5,7 @@ plain text files (e.g., markdown, reStructuredText, latex, etc.)
 
 ## Installation
 
-1. Visit <https://github.com/egh/zotxt/releases>
+1. Visit <https://github.com/colobas/zotxt/releases>
 2. Download the latest `.xpi` file. If you are using Firefox, you will need to right-click and "Save as"
 3. Start Zotero standalone.
 4. In Zotero, select Tools -\> Add-ons -\> Gear (upper right) -\> Install Add-On from file, and install the downloaded xpi file.
