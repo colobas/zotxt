@@ -38,6 +38,116 @@
               "strict_max_version": "8.*"
             }
           }
+        },
+        {
+          "version": "8.0.1",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.1/zotxt-8.0.1.xpi",
+          "update_hash": "sha256:55679a33b11f054db4178a4d1845ec1f580d31cb8ed6287ba83cc890ed76b1cd",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.2",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.2/zotxt-8.0.2.xpi",
+          "update_hash": "sha256:cc5c3226e17ee2f838b12395cf4947c97c466685e52a7e3338ec8255de82994e",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.3",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.3/zotxt-8.0.3.xpi",
+          "update_hash": "sha256:ede9d5a64a369fb5eaecfaed61b0ed12ad9dbdf3b227f884ec040f130de1c5bb",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.4",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.4/zotxt-8.0.4.xpi",
+          "update_hash": "sha256:a33938bb781ee86ed599e7e9ab88442e5ca834983631320b218b7af88e2e1284",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.5",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.5/zotxt-8.0.5.xpi",
+          "update_hash": "sha256:a3d017a0ee9b4efb217f17f46702a7d399f2d5683b0490eb7998f161343d2284",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.6",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.6/zotxt-8.0.6.xpi",
+          "update_hash": "sha256:779ff7fca930a69197f3daa4a8d62d924a02798c0315887a0ee34fbf412b6b9a",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.7",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.7/zotxt-8.0.7.xpi",
+          "update_hash": "sha256:cf5bdafdafea96e38f55e69485b9ce6992c51f84fcff8cdf48655980c483f319",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.9",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.9/zotxt-8.0.9.xpi",
+          "update_hash": "sha256:f631d59324570f94fa66ceaea7235faa2cf83ca7ae1332145fb13fe7a38d62c3",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.10",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.10/zotxt-8.0.10.xpi",
+          "update_hash": "sha256:6b5b0ab10352999363918cd7bad13d0aef17ed3f8949affa292cabe383168008",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        },
+        {
+          "version": "8.0.11",
+          "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.11/zotxt-8.0.11.xpi",
+          "update_hash": "sha256:96ebfa6fae96069cef96a6a247db3cc1cff47f72c4f37cfbf700defa21483097",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
         }
       ]
     }

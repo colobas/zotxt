@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-/* global Components, Set, FileUtils, NetUtil, Q, parseEasyKey, runSearch, buildRawSearch, buildEasyKeySearch, findByKey, cleanQuery, buildSearch, makeCslEngine, findByEasyKey, findByCitationKey, jsonStringify, item2key, makeClientError, ClientError, ensureLoaded */
+/* global Components, Services, Set, FileUtils, NetUtil, Q, parseEasyKey, runSearch, buildRawSearch, buildEasyKeySearch, findByKey, cleanQuery, buildSearch, makeCslEngine, findByEasyKey, findByCitationKey, jsonStringify, item2key, makeClientError, ClientError, ensureLoaded */
 'use strict';
 
 var uuidRe = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/;
@@ -35,6 +35,34 @@ function makeEasyKeyExporterMetadata() {
         },
         'lastUpdated':'2013-07-15 07:03:17'
     };
+}
+
+// Generate easy key directly without translator
+function generateEasyKey(item) {
+    try {
+        let year = '';
+        let dateField = item.getField('date');
+        if (dateField) {
+            let match = dateField.match(/[0-9]{4}/);
+            if (match) year = match[0];
+        }
+        
+        let creators = item.getCreators();
+        let author = 'Anonymous';
+        if (creators && creators.length > 0) {
+            author = creators[0].lastName || creators[0].name || 'Anonymous';
+        }
+        
+        let title = item.getField('title') || '';
+        let cleanTitle = title.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+        let words = cleanTitle.split(/[_-]+/).filter(w => w.length > 1);
+        let titleWord = words[0] || 'unknown';
+        
+        return '@' + author.toLowerCase().replace(/\s+/g, '_') + ':' + year + titleWord.toLowerCase();
+    } catch (e) {
+        Zotero.debug('Error generating easy key: ' + e);
+        return '@unknown:0000unknown';
+    }
 }
 
 const jsonMediaType = 'application/json; charset=UTF-8';
@@ -122,26 +150,43 @@ function myExport (items, translatorId) {
  * Build a response based on items and a format parameter.
  */
 function buildResponse(items, format, style, locale) {
-    return ensureLoaded(items, Zotero).then((items)=>{
+    Zotero.debug('zotxt: buildResponse called with ' + items.length + ' items, format=' + format);
+    // For simple formats that don't need loaded data, skip ensureLoaded
+    if (format === 'key' || format === 'easykey') {
+        Zotero.debug('zotxt: using direct path for format=' + format);
+        let response;
         if (format === 'key') {
-            return [okCode, 'application/json', jsonStringify(items.map(item2key))];
+            response = [okCode, 'application/json', jsonStringify(items.map(item2key))];
         } else if (format === 'easykey') {
-            return buildEasyKeyResponse(items);
-        } else if (format === 'betterbibtexkey' || format === 'citekey') {
-            return buildBBTKeyResponse(items);
-        } else if (format === 'bibtex') {
-            return buildBibTeXResponse(items);
-        } else if (format === 'bibliography') {
-            return buildBibliographyResponse(items, style, locale);
-        } else if (format === 'quickBib') {
-            return buildQuickBibResponse(items);
-        } else if (format === 'paths') {
-            return buildPathsResponse(items, style);
-        } else if (format && format.match(uuidRe)) {
-            return buildExportResponse(items, format);
-        } else {
-            return buildJsonResponse(items);
+            response = buildEasyKeyResponse(items);
         }
+        Zotero.debug('zotxt: direct response: ' + JSON.stringify(response));
+        return Promise.resolve(response);
+    }
+    
+    return ensureLoaded(items, Zotero).then((items)=>{
+        Zotero.debug('zotxt: after ensureLoaded, have ' + items.length + ' items');
+        let response;
+        if (format === 'betterbibtexkey' || format === 'citekey') {
+            response = buildBBTKeyResponse(items);
+        } else if (format === 'bibtex') {
+            response = buildBibTeXResponse(items);
+        } else if (format === 'bibliography') {
+            response = buildBibliographyResponse(items, style, locale);
+        } else if (format === 'quickBib') {
+            response = buildQuickBibResponse(items);
+        } else if (format === 'paths') {
+            response = buildPathsResponse(items, style);
+        } else if (format && format.match(uuidRe)) {
+            response = buildExportResponse(items, format);
+        } else {
+            response = buildJsonResponse(items);
+        }
+        Zotero.debug('zotxt: buildResponse generated response: ' + JSON.stringify(response));
+        return response;
+    }).catch((error) => {
+        Zotero.debug('zotxt: ERROR in buildResponse: ' + error);
+        throw error;
     });
 }
 
@@ -172,7 +217,20 @@ function buildKeyResponse(items, translatorId) {
 }
 
 function buildEasyKeyResponse(items) {
-    return buildKeyResponse(items, makeEasyKeyExporterMetadata().translatorID);
+    Zotero.debug('zotxt: buildEasyKeyResponse called with ' + items.length + ' items');
+    if (items.length === 0) {
+        return [okCode, jsonMediaType, jsonStringify([])];
+    }
+    try {
+        let keys = items.map(generateEasyKey);
+        Zotero.debug('zotxt: generated keys: ' + JSON.stringify(keys));
+        let response = [okCode, jsonMediaType, jsonStringify(keys)];
+        Zotero.debug('zotxt: returning response');
+        return response;
+    } catch (e) {
+        Zotero.debug('zotxt: error in buildEasyKeyResponse: ' + e);
+        throw e;
+    }
 }
 
 function buildBBTKeyResponse(items) {
@@ -249,9 +307,9 @@ function buildPathsResponse(items) {
         let attachments = item.getAttachments(false).map((attachmentId)=>{
             return Zotero.Items.get(attachmentId);
         });
-        return Zotero.Promise.filter(attachments, (attachment)=>{
+        return Promise.resolve(attachments.filter((attachment)=>{
             return attachment.isFileAttachment();
-        }).then ((attachments)=>{
+        })).then ((attachments)=>{
             return attachments.map((a)=> {
                 return a.getFilePathAsync().then((path)=>{
                     if (path) {
@@ -338,6 +396,7 @@ function searchEndpoint(options) {
     const format = options.searchParams.get('format');
     const style = options.searchParams.get('style');
     const locale = options.searchParams.get('locale');
+    Zotero.debug('zotxt: searchEndpoint q=' + q + ' format=' + format);
     if (q) {
         let search = buildSearch(new Zotero.Search(), q, method);
         if (!library) {
@@ -345,8 +404,17 @@ function searchEndpoint(options) {
         } else if (library !== "all") {
             search.libraryID = library;
         }
+        Zotero.debug('zotxt: calling runSearch');
         return runSearch(search, Zotero).then((items)=>{
+            Zotero.debug('zotxt: runSearch returned ' + items.length + ' items');
             return buildResponse(items, format, style, locale);
+        }).then((response) => {
+            Zotero.debug('zotxt: final response: ' + JSON.stringify(response));
+            return response;
+        }).catch((error) => {
+            Zotero.debug('zotxt: ERROR in searchEndpoint: ' + error);
+            Zotero.debug('zotxt: ERROR stack: ' + (error && error.stack));
+            throw error;
         });
     } else {
         return makeClientError('q param required.');
@@ -432,7 +500,22 @@ function localesEndpoint(options) {
 /**
  * Function to load our endpoints into the Zotero connector server.
  */
-function loadEndpoints (version) {   
+function loadEndpoints (version) {
+        // Wrapper to ensure async endpoints work correctly
+        function makeAsyncEndpoint(fn) {
+            return async function(options) {
+                try {
+                    Zotero.debug('zotxt: calling endpoint function');
+                    let result = await fn(options);
+                    Zotero.debug('zotxt: endpoint returned result: ' + JSON.stringify(result));
+                    return result;
+                } catch (e) {
+                    Zotero.debug('zotxt: endpoint error: ' + e);
+                    throw e;
+                }
+            };
+        }
+        
         let endpoints = {
             'version': {
                 supportedMethods: ['GET'],
@@ -442,27 +525,27 @@ function loadEndpoints (version) {
             'complete' : {
                 supportedMethods: ['GET'],
                 supportedDataType : ['application/x-www-form-urlencoded'],
-                init : handleErrors(completeEndpoint)
+                init : makeAsyncEndpoint(handleErrors(completeEndpoint))
             },
             'bibliography' : {
                 supportedMethods: ['POST'],
                 supportedDataType: ['application/x-www-form-urlencoded'],
-                init: handleErrors(bibliographyEndpoint)
+                init: makeAsyncEndpoint(handleErrors(bibliographyEndpoint))
             },
             'search' : {
                 supportedMethods: ['GET'],
                 supportedDataType : ['application/x-www-form-urlencoded'],
-                init : handleErrors(searchEndpoint)
+                init : makeAsyncEndpoint(handleErrors(searchEndpoint))
             },
             'select' : {
                 supportedMethods:['GET'],
                 supportedDataType : ['application/x-www-form-urlencoded'],
-                init : handleErrors(selectEndpoint)
+                init : makeAsyncEndpoint(handleErrors(selectEndpoint))
             },
             'items' : {
                 supportedMethods:['GET'],
                 supportedDataType : ['application/x-www-form-urlencoded'],
-                init : handleErrors(itemsEndpoint)
+                init : makeAsyncEndpoint(handleErrors(itemsEndpoint))
             },
             'styles': {
                 supportedMethods:['GET'],
@@ -471,7 +554,7 @@ function loadEndpoints (version) {
             },
             'locales': {
                 supportedMethods:['GET'],
-                supportedDataType : ['application/x-www-form-urlencoded'],
+                supportedDataType : ['application/x-w-form-urlencoded'],
                 init : localesEndpoint
             }
         };

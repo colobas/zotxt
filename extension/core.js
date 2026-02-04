@@ -43,22 +43,21 @@ function cleanQuery(q) {
  * of promises (based on the id). */
 function dedupItems(items, zotero) {
     let seenIds = new Set([]); // To uniqify results
-    return zotero.Promise.filter(items, (item) => {
-        if (seenIds.has(item.id)) {
-            return false;
-        } else {
-            seenIds.add(item.id);
-            return true;
-        }
+    return Promise.resolve(items).then((resolvedItems) => {
+        return resolvedItems.filter((item) => {
+            if (seenIds.has(item.id)) {
+                return false;
+            } else {
+                seenIds.add(item.id);
+                return true;
+            }
+        });
     });
 };
 
 function ensureLoaded(items, zotero) {
-    return zotero.Promise.map(items, (item)=>{
-        return item.loadAllData().then(()=> {
-            return item;
-        });
-    });
+    // In Zotero 7+, items are loaded on-demand, so just return them
+    return Promise.resolve(items);
 }
 
 function item2key(item) {
@@ -111,7 +110,7 @@ function getItemOrParent(item, zotero) {
     if (!item.isRegularItem() && item.parentKey) {
         return findByKey(item.parentKey, zotero);
     } else {
-        return item;
+        return Promise.resolve(item);
     }
 }
 
@@ -120,11 +119,13 @@ function getItemOrParent(item, zotero) {
  */
 function runSearch(s, zotero) {
     return s.search().then((ids) => {
-        let items = zotero.Items.getAsync(ids);
-        let items2 = zotero.Promise.map(items, (item)=>{
-            return getItemOrParent(item, zotero)
-        });
-        return dedupItems(items2, zotero);
+        return zotero.Items.getAsync(ids);
+    }).then((items) => {
+        return Promise.all(items.map((item)=>{
+            return getItemOrParent(item, zotero);
+        }));
+    }).then((items) => {
+        return dedupItems(items, zotero);
     });
 }
 
