@@ -31,7 +31,7 @@
         {
           "version": "8.0.0",
           "update_link": "https://github.com/colobas/zotxt/releases/download/v8.0.0/zotxt-8.0.0.xpi",
-          "update_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "update_hash": "sha256:046e337a495d200a4f63bc6f1d388a12c10f5cd32548b79c8e17bafb37f78f99",
           "applications": {
             "zotero": {
               "strict_min_version": "6.999",
