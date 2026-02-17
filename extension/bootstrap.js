@@ -496,6 +496,37 @@ function stylesEndpoint(options) {
 function localesEndpoint(options) {
     return [okCode, jsonMediaType, jsonStringify(Zotero.Locale.availableLocales)];
 }
+
+/**
+ * Open a URL in the default browser for manual Zotero Connector capture.
+ * This ensures proper metadata extraction, snapshots, and PDFs.
+ * POST /zotxt/open with url
+ * Returns immediately - user must manually click Zotero Connector
+ */
+async function openEndpoint(options) {
+    const url = options.data.url || options.searchParams.get('url');
+    
+    if (!url) {
+        return makeClientError('URL is required');
+    }
+    
+    try {
+        Zotero.debug('zotxt: Opening URL in browser: ' + url);
+        
+        // Open URL in default browser
+        Zotero.launchURL(url);
+        
+        return [okCode, jsonMediaType, jsonStringify({
+            success: true,
+            message: 'URL opened in browser. Please use Zotero Connector to save.',
+            url: url
+        })];
+        
+    } catch (e) {
+        Zotero.debug('zotxt: Error opening URL: ' + e);
+        return makeClientError('Failed to open URL: ' + e.message);
+    }
+}
  
 /**
  * Function to load our endpoints into the Zotero connector server.
@@ -556,6 +587,11 @@ function loadEndpoints (version) {
                 supportedMethods:['GET'],
                 supportedDataType : ['application/x-w-form-urlencoded'],
                 init : localesEndpoint
+            },
+            'open': {
+                supportedMethods: ['POST', 'GET'],
+                supportedDataType: ['application/x-www-form-urlencoded', 'application/json'],
+                init: makeAsyncEndpoint(handleErrors(openEndpoint))
             }
         };
         for (let e in endpoints) {
