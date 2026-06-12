@@ -504,7 +504,7 @@ function localesEndpoint(options) {
  * Returns immediately - user must manually click Zotero Connector
  */
 async function openEndpoint(options) {
-    const url = options.data.url || options.searchParams.get('url');
+    const url = options.searchParams.get('url') || (options.data && options.data.url);
     
     if (!url) {
         return makeClientError('URL is required');

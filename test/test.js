@@ -188,17 +188,21 @@ describe('#core.getItemOrParent()', () => {
     it("returns item when item is a regularItem", ()=>{
         const isRegularItem = sinon.stub().returns(true);
         const item = { isRegularItem };
-        assert.equal(item, core.getItemOrParent(item, undefined));
+        return core.getItemOrParent(item, undefined).then((result) => {
+            assert.equal(item, result);
+        });
     });
 
     it("returns item when item is not a regularItem but the parentKey is falsey", ()=>{
         const isRegularItem = sinon.stub().returns(false);
         const parentKey = undefined;
         const item = { isRegularItem, parentKey };
-        assert.equal(item, core.getItemOrParent(item, undefined));
+        return core.getItemOrParent(item, undefined).then((result) => {
+            assert.equal(item, result);
+        });
     });
 
-    it("returns item when item is not a regularItem but the parentKey is falsey", ()=>{
+    it("returns parent item when item is not a regularItem and parentKey exists", ()=>{
         const retval = 'foo';
         const isRegularItem = sinon.stub().returns(false);
         const parentKey = "foo_bar";
@@ -206,7 +210,9 @@ describe('#core.getItemOrParent()', () => {
         const getByLibraryAndKeyAsync = sinon.stub().returns(Promise.resolve(retval));
         const Items = { getByLibraryAndKeyAsync };
         const zotero = { Items };
-        core.getItemOrParent(item, zotero).then((item)=> { assert.equal(retval, item); });
+        return core.getItemOrParent(item, zotero).then((result)=> {
+            assert.equal(retval, result);
+        });
     });
 });
 

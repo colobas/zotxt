@@ -10,6 +10,17 @@ plain text files (e.g., markdown, reStructuredText, latex, etc.)
 3. Start Zotero standalone.
 4. In Zotero, select Tools -\> Add-ons -\> Gear (upper right) -\> Install Add-On from file, and install the downloaded xpi file.
 
+## Development
+
+Tests currently require Node 22. On Apple Silicon with Homebrew:
+
+    brew install node@22
+    make
+
+If Node 22 is installed elsewhere, override `NODE_BIN` when invoking make:
+
+    make NODE_BIN=/path/to/node/bin
+
 ## pandoc integration
 
 Please install the [pandoc-zotxt.lua](https://github.com/odkr/pandoc-zotxt.lua) extension to pandoc as well as [Better BibTeX](https://github.com/retorquere/zotero-better-bibtex/wiki/Installation),

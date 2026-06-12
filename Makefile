@@ -1,6 +1,8 @@
 .PHONY: clean test unittest dist
 
+NODE_BIN ?= /opt/homebrew/opt/node@22/bin
 VERSION=$(shell jq .version extension/manifest.json -r)
+NPM = PATH="$(NODE_BIN):$$PATH" npm
 
 dist: test zotxt-$(VERSION).xpi ;
 
@@ -13,7 +15,7 @@ clean:
 	rm -f zotxt-*.xpi
 
 unittest:
-	npm test
+	$(NPM) test
 
 test: unittest
 	cd test && ruby test.rb

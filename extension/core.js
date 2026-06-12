@@ -43,7 +43,7 @@ function cleanQuery(q) {
  * of promises (based on the id). */
 function dedupItems(items, zotero) {
     let seenIds = new Set([]); // To uniqify results
-    return Promise.resolve(items).then((resolvedItems) => {
+    return Promise.all(items).then((resolvedItems) => {
         return resolvedItems.filter((item) => {
             if (seenIds.has(item.id)) {
                 return false;
